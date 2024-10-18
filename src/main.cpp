@@ -1,7 +1,11 @@
 #include <cstdlib>
+#include <muduo/net/EventLoop.h>
+#include <muduo/net/InetAddress.h>
+#include <string>
 #include <unistd.h>
 #include <iostream>
 #include "qchatconfig.hpp"
+#include "qchatserver.hpp"
 using namespace std;
 
 void ShowArgHelp()
@@ -31,11 +35,16 @@ int main(int argc, char** argv)
         }
     }
 
+    // 读取配置文件
     QChatConfig::GetInstance().LoadConfigFile(config_file);
-    // std::cout << QChatConfig::GetInstance().Load("serverip") << std::endl;
-    // std::cout << QChatConfig::GetInstance().Load("serverport") << std::endl;
-    // std::cout << QChatConfig::GetInstance().Load("redisip") << std::endl;
-    // std::cout << QChatConfig::GetInstance().Load("redisport") << std::endl;
+
+    // 启动muduo server
+    muduo::net::EventLoop loop;
+    muduo::net::InetAddress addr(QChatConfig::GetInstance().Load("serverip"), stoi(QChatConfig::GetInstance().Load("serverport")));
+
+    QChatServer chat_sever(&loop, addr, "ChatServer");
+    chat_sever.Start();
+    loop.loop();
 
     return 0;
 }
