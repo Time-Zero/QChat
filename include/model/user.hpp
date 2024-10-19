@@ -6,7 +6,7 @@
 class User
 {
 public:
-    User(uint32_t id = 0, std::string name = "", std::string password = "", std::string state = "")
+    User(uint32_t id = 0, std::string name = "", std::string password = "", std::string state = "offline")
         : _id(id), _name(name), _password(password), _state(state)
     {
 

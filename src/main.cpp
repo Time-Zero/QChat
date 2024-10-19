@@ -6,6 +6,9 @@
 #include <iostream>
 #include "qchatconfig.hpp"
 #include "qchatserver.hpp"
+#include "qchatservice.hpp"
+#include <csignal>
+
 using namespace std;
 
 void ShowArgHelp()
@@ -13,8 +16,17 @@ void ShowArgHelp()
     std::cout << "format: command -i <configfile>" << std::endl;
 }
 
+void ResetHandler(int)
+{
+    QChatService::GetInstance().reset();
+    exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char** argv)
 {  
+
+    std::signal(SIGINT, ResetHandler);
+
     if(argc < 2)
     {
         ShowArgHelp();
