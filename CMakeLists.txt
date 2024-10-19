@@ -8,6 +8,9 @@ set(CMAKE_BUILD_TYPE "Debug")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include/server)
+include_directories(${PROJECT_SOURCE_DIR}/include/db)
+include_directories(${PROJECT_SOURCE_DIR}/include/model)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 

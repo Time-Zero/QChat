@@ -1,3 +1,6 @@
 aux_source_directory(. SRC_LIST)
-add_executable(QChat ${SRC_LIST})
-target_link_libraries(QChat muduo_net muduo_base pthread)
+aux_source_directory(server/ SERVER_LIST)
+aux_source_directory(db/ DB_LIST)
+add_executable(QChat ${SRC_LIST} ${SERVER_LIST} ${DB_LIST})
+find_package(nlohmann_json 3.6.0 REQUIRED)
+target_link_libraries(QChat muduo_net muduo_base mysqlclient nlohmann_json::nlohmann_json pthread)
