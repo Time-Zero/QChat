@@ -25,6 +25,7 @@ void QChatServer::OnConnection(const muduo::net::TcpConnectionPtr& conn)
     // 连接断开处理
     if(!conn->connected())
     {
+        QChatService::GetInstance().client_close_exception(conn);
         conn->shutdown();
     }
 }
