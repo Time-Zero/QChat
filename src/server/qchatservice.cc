@@ -79,14 +79,16 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
     if(user.GetId() == id && user.GetPassword() == pwd)
     {
         // 如果用户名和密码都正确
+
         if(user.GetState() == "online")
         {
             // 用户在线
             response["errno"] = 2;
             response["errnomsg"] = "this account is online!";
         }
-        else
+        else        // 正常登录处理逻辑
         {
+            
             {
                 std::lock_guard<std::mutex> lck(_mtx);
                 _user_conn_map.insert({id, conn});
@@ -100,6 +102,14 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
             response["errno"] = 0;
             response["id"] = user.GetId();
             response["name"] = user.GetName();
+
+            // 查询登录用户是否有离线消息
+            auto vec = _offlinemessagemodel.Query(user.GetId());
+            if(!vec.empty())
+            {
+                response["offlinemsg"] = vec;
+                _offlinemessagemodel.Remove(user.GetId());
+            }    
         }
     }
     else
@@ -129,6 +139,16 @@ void QChatService::one_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann::
             it->second->send(js.dump());
             return;
         }
+    }
+
+    User user = _usermodel.Query(to_id);
+    if(user.GetState() == "online")
+    {
+        // 如果在线通过redis转发
+    }
+    else
+    {
+        _offlinemessagemodel.Insert(to_id, js.dump());
     }
 
 }

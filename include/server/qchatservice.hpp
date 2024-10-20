@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include "offlinemessage.hpp"
 #include "usermodel.hpp"
 
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr& ,nlohmann::json& , muduo::Timestamp)>;
@@ -45,4 +46,5 @@ private:
     std::unordered_map<int, muduo::net::TcpConnectionPtr> _user_conn_map;           // 用户id：连接映射
     std::unordered_map<muduo::net::TcpConnectionPtr, int> _conn_user_map;           // 连接：用户id映射（用户客户端异常退出时处理）
     UserModel _usermodel;                                                           // 用户表操作
+    OfflineMessage _offlinemessagemodel;                                            // 离线消息表操作
 };
