@@ -45,6 +45,9 @@ public:
     // 群聊
     void group_chat(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
 
+    // 注销
+    void login_out(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
+
     // 客户端退出状态转换
     void client_close_exception(const muduo::net::TcpConnectionPtr& );
     

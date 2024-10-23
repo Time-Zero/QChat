@@ -26,7 +26,7 @@ QChatService::QChatService()
     _msg_handler_map.insert({CREAT_GROUP_MSG, std::bind(&QChatService::create_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({ADD_GROUP_MSG, std::bind(&QChatService::add_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({GROUP_CHAT_MSG, std::bind(&QChatService::group_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-    
+    _msg_handler_map.insert({LOGIN_OUT_MSG, std::bind(&QChatService::login_out,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -243,4 +243,24 @@ void QChatService::group_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann
             }
         }
     }
+}
+
+void QChatService::login_out(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+
+    {
+        std::lock_guard<std::mutex> lck(_mtx);
+        auto it = _user_conn_map.find(userid);
+        if(it != _user_conn_map.end())
+        {
+            _conn_user_map.erase(it->second);
+            _user_conn_map.erase(it);
+        }
+    }
+
+    // TODO:注销redis
+
+    User user(userid,"","","offline");
+    _usermodel.UpdateState(user);
 }
