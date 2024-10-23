@@ -5,6 +5,8 @@
 #include <muduo/net/Callbacks.h>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
+#include <vector>
+#include "group.hpp"
 #include "public.hpp"
 #include "user.hpp"
 // #include <iostream>
@@ -21,6 +23,10 @@ QChatService::QChatService()
     _msg_handler_map.insert({LOGIN_MSG, std::bind(&QChatService::login,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({ONE_CHAT_MSG, std::bind(&QChatService::one_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({ADD_FRIEND_MSG, std::bind(&QChatService::add_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({CREAT_GROUP_MSG, std::bind(&QChatService::create_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({ADD_GROUP_MSG, std::bind(&QChatService::add_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({GROUP_CHAT_MSG, std::bind(&QChatService::group_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -177,11 +183,64 @@ void QChatService::client_close_exception(const muduo::net::TcpConnectionPtr& co
     }
 }
 
-
 void QChatService::add_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
 {
     int userid = js["id"];
     int friendid = js["friendid"];
 
     _friendmodel.Insert(userid, friendid);
+}
+
+void QChatService::create_group(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+    std::string name = js["groupname"];
+    std::string desc = js["groupdesc"];
+
+    Group group(0, name, desc);
+    if(_groupmodel.CreateGroup(group))      // 创建群组
+    {
+        _groupmodel.AddGroup(userid, group.GetId(), "creator");     // 向群组中添加用户，并且设置创建用户的身份为creator
+    }
+}
+
+void QChatService::add_group(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+    int groupid = js["groupid"];
+
+    _groupmodel.AddGroup(userid, groupid, "normal");
+}
+
+void QChatService::group_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+    int groupid = js["groupid"];
+
+    std::vector<int> userid_vec = _groupmodel.QueryGroupUsers(userid, groupid);
+    for(auto id : userid_vec)
+    {
+        std::unique_lock<std::mutex> lck(_mtx);
+        auto it = _user_conn_map.find(id);
+        if(it != _user_conn_map.end())
+        {
+            it->second->send(js.dump());
+            lck.unlock();
+        }
+        else
+        {
+            lck.unlock();
+            User user = _usermodel.Query(id);
+            if(user.GetState() == "online")
+            {
+                // 用户在线，但是不在本服务器登录
+                // TODO:使用redis转发消息
+            }
+            else
+            {
+                // 如果用户离线，就保存用户离线消息
+                _offlinemessagemodel.Insert(id, js.dump());
+            }
+        }
+    }
 }

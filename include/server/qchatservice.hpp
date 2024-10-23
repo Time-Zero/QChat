@@ -10,6 +10,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include "friendmodel.hpp"
+#include "groupmodel.hpp"
 #include "offlinemessage.hpp"
 #include "usermodel.hpp"
 
@@ -35,6 +36,15 @@ public:
     // 一对一聊天 
     void one_chat(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
 
+    // 创建群聊
+    void create_group(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
+
+    // 用户加入群聊
+    void add_group(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
+
+    // 群聊
+    void group_chat(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
+
     // 客户端退出状态转换
     void client_close_exception(const muduo::net::TcpConnectionPtr& );
     
@@ -51,5 +61,6 @@ private:
     std::unordered_map<muduo::net::TcpConnectionPtr, int> _conn_user_map;           // 连接：用户id映射（用户客户端异常退出时处理）
     UserModel _usermodel;                                                           // 用户表操作
     OfflineMessage _offlinemessagemodel;                                            // 离线消息表操作
-    FriendModel _friendmodel;
+    GroupModel _groupmodel;                                                         // 群组表操作
+    FriendModel _friendmodel;                                                       // 好友表操作
 };
