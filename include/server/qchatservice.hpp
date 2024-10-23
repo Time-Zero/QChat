@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include "friendmodel.hpp"
 #include "offlinemessage.hpp"
 #include "usermodel.hpp"
 
@@ -27,6 +28,9 @@ public:
 
     // 登录
     void login(const muduo::net::TcpConnectionPtr& , nlohmann::json&, muduo::Timestamp);
+
+    // 添加好友
+    void add_friend(const muduo::net::TcpConnectionPtr& , nlohmann::json&, muduo::Timestamp);
 
     // 一对一聊天 
     void one_chat(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
@@ -47,4 +51,5 @@ private:
     std::unordered_map<muduo::net::TcpConnectionPtr, int> _conn_user_map;           // 连接：用户id映射（用户客户端异常退出时处理）
     UserModel _usermodel;                                                           // 用户表操作
     OfflineMessage _offlinemessagemodel;                                            // 离线消息表操作
+    FriendModel _friendmodel;
 };

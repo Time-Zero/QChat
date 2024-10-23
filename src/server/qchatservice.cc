@@ -20,7 +20,7 @@ QChatService::QChatService()
     _msg_handler_map.insert({REG_MSG, std::bind(&QChatService::reg,this,std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msg_handler_map.insert({LOGIN_MSG, std::bind(&QChatService::login,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({ONE_CHAT_MSG, std::bind(&QChatService::one_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-    
+    _msg_handler_map.insert({ADD_FRIEND_MSG, std::bind(&QChatService::add_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -145,6 +145,7 @@ void QChatService::one_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann::
     if(user.GetState() == "online")
     {
         // 如果在线通过redis转发
+        // TODO: 添加redis在线转发
     }
     else
     {
@@ -174,4 +175,13 @@ void QChatService::client_close_exception(const muduo::net::TcpConnectionPtr& co
         user.SetState("offline");
         _usermodel.UpdateState(user);
     }
+}
+
+
+void QChatService::add_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+    int friendid = js["friendid"];
+
+    _friendmodel.Insert(userid, friendid);
 }

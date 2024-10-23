@@ -2,4 +2,5 @@
 {"msgid":1,"name":"li si","password":"123456"}      // 注册
 {"msgid":3,"id":1,"password":"123456"}                  // 登录
 {"msgid":3,"id":2,"password":"123456"}                  // 登录
-{"msgid":5,"id":1,"to":2,"msg":"hello world"}
+{"msgid":5,"id":1,"to":2,"msg":"hello world"}           // 发消息
+{"msgid":6,"id":1,"friendid":2}                         // 添加好友
