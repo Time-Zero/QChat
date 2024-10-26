@@ -12,4 +12,5 @@ enum EnMsgType
     ADD_GROUP_MSG,               // 加入群组
     GROUP_CHAT_MSG,             // 群聊
     LOGIN_OUT_MSG,              // 注销
+    DELETE_FRIEND_MSG,          // 删除好友
 };

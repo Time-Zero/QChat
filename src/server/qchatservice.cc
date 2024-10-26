@@ -9,7 +9,6 @@
 #include "group.hpp"
 #include "public.hpp"
 #include "user.hpp"
-// #include <iostream>
 
 QChatService& QChatService::GetInstance()
 {
@@ -27,6 +26,7 @@ QChatService::QChatService()
     _msg_handler_map.insert({ADD_GROUP_MSG, std::bind(&QChatService::add_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({GROUP_CHAT_MSG, std::bind(&QChatService::group_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({LOGIN_OUT_MSG, std::bind(&QChatService::login_out,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({DELETE_FRIEND_MSG, std::bind(&QChatService::delete_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -90,7 +90,7 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
         {
             // 用户在线
             response["errno"] = 2;
-            response["errnomsg"] = "this account is online!";
+            response["errnomsg"] = "当前账户已被登录!";
         }
         else        // 正常登录处理逻辑
         {
@@ -116,13 +116,28 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
                 response["offlinemsg"] = vec;
                 _offlinemessagemodel.Remove(user.GetId());
             }    
+
+            std::vector<User> user_vec = _friendmodel.Query(user.GetId());
+            if(!user_vec.empty())
+            {
+                std::vector<std::string> temp_vec;
+                for(auto it : user_vec)
+                {
+                    nlohmann::json user_js;
+                    user_js["id"] = it.GetId();
+                    user_js["name"] = it.GetName();
+                    user_js["state"] = it.GetState();
+                    temp_vec.emplace_back(user_js.dump());
+                }
+                response["friends"] = temp_vec; 
+            }
         }
     }
     else
     {
         // 用户名或密码错误
         response["errno"] = 1;
-        response["errmsg"] = "username or password error!";
+        response["errmsg"] = "账号或密码错误!";
     }
 
     conn->send(response.dump());
@@ -189,6 +204,14 @@ void QChatService::add_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann
     int friendid = js["friendid"];
 
     _friendmodel.Insert(userid, friendid);
+}
+
+void QChatService::delete_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    int userid = js["id"];
+    int friendid = js["friendid"];
+
+    _friendmodel.Delete(userid, friendid);
 }
 
 void QChatService::create_group(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)

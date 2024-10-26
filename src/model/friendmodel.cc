@@ -20,6 +20,19 @@ void FriendModel::Insert(int userid, int friendid)
     }
 }
 
+void FriendModel::Delete(int userid, int friendid)
+{
+    char sql[1024];
+    bzero(sql, sizeof(sql));
+    sprintf(sql, "delete from Friend where userid = %d and friendid = %d", userid, friendid);
+
+    MySQL mysql;
+    if(mysql.Connect())
+    {
+        mysql.Query(sql);
+    }
+}
+
 
 std::vector<User> FriendModel::Query(int userid)
 {
