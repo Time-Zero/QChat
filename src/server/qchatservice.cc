@@ -90,7 +90,7 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
         {
             // 用户在线
             response["errno"] = 2;
-            response["errnomsg"] = "当前账户已被登录!";
+            response["errmsg"] = "当前账户已被登录!";
         }
         else        // 正常登录处理逻辑
         {

@@ -6,6 +6,7 @@
 #include <vector>
 #include "db.hpp"
 #include "user.hpp"
+#include <iostream>
 
 void FriendModel::Insert(int userid, int friendid)
 {
@@ -39,8 +40,9 @@ std::vector<User> FriendModel::Query(int userid)
     char sql[1024];
     bzero(sql, sizeof(sql));
     sprintf(sql, 
-            "select a.id, a.name, a.state from User a inner join Friend b on b.friendid = a.id where b.userid = %d,", userid);
-
+            "select a.id, a.name, a.state from User a inner join Friend b on b.friendid = a.id where b.userid = %d", userid);
+    std::cout << sql << std::endl;
+    
     std::vector<User> vec;
     MySQL mysql;
     if(mysql.Connect())
