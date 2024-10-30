@@ -13,4 +13,5 @@ enum EnMsgType
     GROUP_CHAT_MSG,             // 群聊
     LOGIN_OUT_MSG,              // 注销
     DELETE_FRIEND_MSG,          // 删除好友
+    USER_INFO_EDIT_MSG,         // 用户信息修改
 };

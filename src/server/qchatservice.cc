@@ -5,6 +5,7 @@
 #include <muduo/net/Callbacks.h>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
+#include <string>
 #include <vector>
 #include "group.hpp"
 #include "public.hpp"
@@ -27,6 +28,8 @@ QChatService::QChatService()
     _msg_handler_map.insert({GROUP_CHAT_MSG, std::bind(&QChatService::group_chat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({LOGIN_OUT_MSG, std::bind(&QChatService::login_out,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({DELETE_FRIEND_MSG, std::bind(&QChatService::delete_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({USER_INFO_EDIT_MSG, std::bind(&QChatService::user_info_edit,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -286,4 +289,18 @@ void QChatService::login_out(const muduo::net::TcpConnectionPtr& conn, nlohmann:
 
     User user(userid,"","","offline");
     _usermodel.UpdateState(user);
+}
+
+void QChatService::user_info_edit(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    unsigned int id = js["id"].get<int>();
+    std::string name = js["name"].get<std::string>();
+    std::string password = js["password"].get<std::string>();
+
+    User user;
+    user.SetId(id);
+    user.SetName(name);
+    user.SetPassword(password);
+
+    _usermodel.EditUserInfo(user);
 }

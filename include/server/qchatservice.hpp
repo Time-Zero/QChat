@@ -53,7 +53,10 @@ public:
 
     // 客户端退出状态转换
     void client_close_exception(const muduo::net::TcpConnectionPtr& );
-    
+
+    // 修改用户信息
+    void user_info_edit(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
+
     // 重置所有用户状态
     void reset();
 

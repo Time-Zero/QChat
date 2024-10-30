@@ -81,3 +81,17 @@ void UserModel::ResetState()
         mysql.Update(sql);
     }
 }  
+
+void UserModel::EditUserInfo(User& user)
+{
+    char sql[1024];
+    bzero(sql, sizeof(sql));
+    sprintf(sql, "update User set name = '%s', password = '%s' where id = %d"
+            , user.GetName().c_str(), user.GetPassword().c_str(), user.GetId());
+
+    MySQL mysql;
+    if(mysql.Connect())
+    {
+        mysql.Update(sql);
+    }
+}

@@ -16,4 +16,7 @@ public:
 
     // 重置所有用户状态
     void ResetState();
+
+    // 修改用户信息
+    void EditUserInfo(User& user);
 };
