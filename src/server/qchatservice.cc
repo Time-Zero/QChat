@@ -134,6 +134,21 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
                 }
                 response["friends"] = temp_vec; 
             }
+
+            std::vector<Group> group_vec = _groupmodel.QueryGroup(user.GetId());
+            if(!group_vec.empty())
+            {
+                std::vector<std::string> temp_vec;
+                for(auto it : group_vec)
+                {
+                    nlohmann::json group_js;
+                    group_js["id"] = it.GetId();
+                    group_js["name"] = it.GetName();
+                    group_js["desc"] = it.GetDesc();
+                    temp_vec.emplace_back(group_js.dump());
+                }
+                response["groups"] = temp_vec;
+            }
         }
     }
     else

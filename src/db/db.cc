@@ -32,7 +32,7 @@ bool MySQL::Connect()
     }
     else
     {
-        mysql_query(_conn.get(), "set names gbk");      // 让代码可以支持中文
+        // mysql_query(_conn.get(), "set names gbk");      // 让代码可以支持中文
         mysql_query(_conn.get(), "use chat");           // 切换到chat数据库
         LOG_INFO << "connect mysql success";
     }

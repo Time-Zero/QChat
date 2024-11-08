@@ -41,7 +41,7 @@ std::vector<User> FriendModel::Query(int userid)
     bzero(sql, sizeof(sql));
     sprintf(sql, 
             "select a.id, a.name, a.state from User a inner join Friend b on b.friendid = a.id where b.userid = %d", userid);
-    std::cout << sql << std::endl;
+    // std::cout << sql << std::endl;
     
     std::vector<User> vec;
     MySQL mysql;
