@@ -259,6 +259,11 @@ void QChatService::create_group(const muduo::net::TcpConnectionPtr& conn, nlohma
     {
         _groupmodel.AddGroup(userid, group.GetId(), "creator");     // 向群组中添加用户，并且设置创建用户的身份为creator
     }
+
+    nlohmann::json ack_js;
+    ack_js["msgid"] = CREATE_GROUP_ACK;
+    ack_js["id"] = group.GetId();
+    conn->send(ack_js.dump());
 }
 
 void QChatService::add_group(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)

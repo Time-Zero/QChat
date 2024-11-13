@@ -19,4 +19,5 @@ enum EnMsgType
     USER_SEARCH_MSG,            // 通过id查找用户
     USER_SEARCH_ACK,            // 返回id查找用户的结果
     USER_ADDED_MSG,             // 用户被人添加好友
+    CREATE_GROUP_ACK,           // 创建群聊的响应消息
 };
