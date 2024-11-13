@@ -33,6 +33,9 @@ public:
     // 添加好友
     void add_friend(const muduo::net::TcpConnectionPtr& , nlohmann::json&, muduo::Timestamp);
 
+    // 查找好友
+    void search_user(const muduo::net::TcpConnectionPtr& , nlohmann::json&, muduo::Timestamp);
+
     // 删除好友
     void delete_friend(const muduo::net::TcpConnectionPtr& , nlohmann::json&, muduo::Timestamp);
 

@@ -30,6 +30,7 @@ QChatService::QChatService()
     _msg_handler_map.insert({DELETE_FRIEND_MSG, std::bind(&QChatService::delete_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({USER_INFO_EDIT_MSG, std::bind(&QChatService::user_info_edit,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({GROUP_SEARCH_MSG, std::bind(&QChatService::search_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+    _msg_handler_map.insert({USER_SEARCH_MSG, std::bind(&QChatService::search_user,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -223,6 +224,20 @@ void QChatService::add_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann
     int friendid = js["friendid"];
 
     _friendmodel.Insert(userid, friendid);
+    
+    // 如果被添加的用户是在线状态，发送一个消息让他知道他被添加了，让其刷新好友列表
+    auto it = _user_conn_map.find(friendid);
+    if(it != _user_conn_map.end())
+    {
+        User user = _usermodel.Query(userid);
+        std::string user_name = user.GetName();
+        nlohmann::json ack_js;
+        ack_js["msgid"] = USER_ADDED_MSG;
+        ack_js["id"] = userid;
+        ack_js["name"] = user_name;
+
+        it->second->send(ack_js.dump());
+    }
 }
 
 void QChatService::delete_friend(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
@@ -330,6 +345,18 @@ void QChatService::search_group(const muduo::net::TcpConnectionPtr& conn, nlohma
     ack_js["msgid"] = GROUP_SEARCH_ACK;
     ack_js["name"] = group.GetName();
     ack_js["desc"] = group.GetDesc();
+
+    conn->send(ack_js.dump());
+}
+
+void QChatService::search_user(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    unsigned int id = js["id"].get<int>();
+    User user = _usermodel.Query(id);
+
+    nlohmann::json ack_js;
+    ack_js["msgid"] = USER_SEARCH_ACK;
+    ack_js["name"] = user.GetName();
 
     conn->send(ack_js.dump());
 }

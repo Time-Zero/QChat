@@ -16,4 +16,7 @@ enum EnMsgType
     USER_INFO_EDIT_MSG,         // 用户信息修改
     GROUP_SEARCH_MSG,           // 通过id查找群
     GROUP_SEARCH_ACK,           // 发送id查找群的结果
+    USER_SEARCH_MSG,            // 通过id查找用户
+    USER_SEARCH_ACK,            // 返回id查找用户的结果
+    USER_ADDED_MSG,             // 用户被人添加好友
 };

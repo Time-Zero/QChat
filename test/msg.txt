@@ -4,6 +4,6 @@
 {"msgid":3,"id":2,"password":"123456"}                  // 登录
 {"msgid":5,"id":10,"to":9,"msg":"hello world"}           // 发消息
 {"msgid":6,"id":9,"friendid":10}                         // 添加好友
-{"msgid":7,"id":10,"groupname":"test","groupdesc":"this is a test group"}        // 创建group
+{"msgid":7,"id":10,"groupname":"A","groupdesc":"this is a test group"}        // 创建group
 {"msgid":8,"id":9,"groupid":2}                          // 加入group
 {"msgid":9,"id":1,"name":"雪豹","groupid":2,"msg":"hello world"}      // 群聊消息
