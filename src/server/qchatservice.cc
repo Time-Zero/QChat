@@ -120,6 +120,7 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
                 _offlinemessagemodel.Remove(user.GetId());
             }    
 
+            // 获取好友信息
             std::vector<User> user_vec = _friendmodel.Query(user.GetId());
             if(!user_vec.empty())
             {

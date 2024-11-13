@@ -6,13 +6,12 @@
 #include <vector>
 #include "db.hpp"
 #include "user.hpp"
-#include <iostream>
 
 void FriendModel::Insert(int userid, int friendid)
 {
     char sql[1024];
     bzero(sql,sizeof(sql));
-    sprintf(sql, "insert into Friend(userid, friendid) values(%d,%d)",userid,friendid);
+    sprintf(sql, "insert into Friend(userid, friendid) values(%d,%d),(%d,%d)",userid,friendid,friendid,userid);
 
     MySQL mysql;
     if(mysql.Connect())
