@@ -45,6 +45,9 @@ public:
     // 用户加入群聊
     void add_group(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
 
+    // 通过群聊id查找群聊
+    void search_group(const muduo::net::TcpConnectionPtr&, nlohmann::json& ,muduo::Timestamp);
+
     // 群聊
     void group_chat(const muduo::net::TcpConnectionPtr&, nlohmann::json&, muduo::Timestamp);
 

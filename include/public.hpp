@@ -14,4 +14,6 @@ enum EnMsgType
     LOGIN_OUT_MSG,              // 注销
     DELETE_FRIEND_MSG,          // 删除好友
     USER_INFO_EDIT_MSG,         // 用户信息修改
+    GROUP_SEARCH_MSG,           // 通过id查找群
+    GROUP_SEARCH_ACK,           // 发送id查找群的结果
 };

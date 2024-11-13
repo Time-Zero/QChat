@@ -124,3 +124,29 @@ std::vector<int> GroupModel::QueryGroupUsers(int userid, int gourpid)
 
     return id_vec;
 }
+
+Group GroupModel::SearchGroup(int groupid)
+{
+    char sql[1024];
+    bzero(sql, sizeof(sql));
+    sprintf(sql, "select groupname, groupdesc from AllGroup where id = %d", groupid);
+
+    Group group;
+    MySQL mysql;
+    if(mysql.Connect())
+    {
+        MYSQL_RES* res = mysql.Query(sql);
+        if(res != nullptr)
+        {
+            MYSQL_ROW row = mysql_fetch_row(res);
+            if(row != nullptr)
+            {
+                group.SetName(row[0]);
+                group.SetDesc(row[1]);
+            }
+            mysql_free_result(res);
+        }
+    }
+
+    return group;
+}

@@ -29,7 +29,7 @@ QChatService::QChatService()
     _msg_handler_map.insert({LOGIN_OUT_MSG, std::bind(&QChatService::login_out,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({DELETE_FRIEND_MSG, std::bind(&QChatService::delete_friend,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({USER_INFO_EDIT_MSG, std::bind(&QChatService::user_info_edit,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-    
+    _msg_handler_map.insert({GROUP_SEARCH_MSG, std::bind(&QChatService::search_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -319,4 +319,17 @@ void QChatService::user_info_edit(const muduo::net::TcpConnectionPtr& conn, nloh
     user.SetPassword(password);
 
     _usermodel.EditUserInfo(user);
+}
+
+void QChatService::search_group(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
+{
+    unsigned int id = js["id"].get<int>();
+
+    Group group = _groupmodel.SearchGroup(id);
+    nlohmann::json ack_js;
+    ack_js["msgid"] = GROUP_SEARCH_ACK;
+    ack_js["name"] = group.GetName();
+    ack_js["desc"] = group.GetDesc();
+
+    conn->send(ack_js.dump());
 }
