@@ -31,6 +31,11 @@ QChatService::QChatService()
     _msg_handler_map.insert({USER_INFO_EDIT_MSG, std::bind(&QChatService::user_info_edit,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({GROUP_SEARCH_MSG, std::bind(&QChatService::search_group,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     _msg_handler_map.insert({USER_SEARCH_MSG, std::bind(&QChatService::search_user,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
+
+    if(_redis.connect())
+    {
+        _redis.init_notify_handler(std::bind(&QChatService::handler_redis_subscribe_message,this , std::placeholders::_1, std::placeholders::_2));
+    }
 }
 
 MsgHandler QChatService::GetHandler(int msgid)
@@ -105,6 +110,8 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
                 _conn_user_map.insert({conn, id});
             }
 
+            // redis订阅有关这个用户的信息
+            _redis.subscribe(user.GetId());
             // 用户状态设置为在线
             user.SetState("online");
             _usermodel.UpdateState(user);
@@ -166,6 +173,11 @@ void QChatService::login(const muduo::net::TcpConnectionPtr& conn, nlohmann::jso
 void QChatService::reset()
 {
     _usermodel.ResetState();
+    // 取消所有redis的订阅
+    for(auto it : _user_conn_map)
+    {
+        _redis.unsubscribe(it.first);
+    }
 }
 
 void QChatService::one_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann::json& js, muduo::Timestamp)
@@ -185,8 +197,8 @@ void QChatService::one_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann::
     User user = _usermodel.Query(to_id);
     if(user.GetState() == "online")
     {
-        // 如果在线通过redis转发
-        // TODO: 添加redis在线转发
+        _redis.publish(to_id, js.dump());
+        return;
     }
     else
     {
@@ -215,6 +227,7 @@ void QChatService::client_close_exception(const muduo::net::TcpConnectionPtr& co
         user.SetId(id);
         user.SetState("offline");
         _usermodel.UpdateState(user);
+        _redis.unsubscribe(id);
     }
 }
 
@@ -295,8 +308,7 @@ void QChatService::group_chat(const muduo::net::TcpConnectionPtr& conn, nlohmann
             User user = _usermodel.Query(id);
             if(user.GetState() == "online")
             {
-                // 用户在线，但是不在本服务器登录
-                // TODO:使用redis转发消息
+                _redis.publish(id, js.dump());
             }
             else
             {
@@ -321,7 +333,7 @@ void QChatService::login_out(const muduo::net::TcpConnectionPtr& conn, nlohmann:
         }
     }
 
-    // TODO:注销redis
+    _redis.unsubscribe(userid);
 
     User user(userid,"","","offline");
     _usermodel.UpdateState(user);
@@ -364,4 +376,17 @@ void QChatService::search_user(const muduo::net::TcpConnectionPtr& conn, nlohman
     ack_js["name"] = user.GetName();
 
     conn->send(ack_js.dump());
+}
+
+void QChatService::handler_redis_subscribe_message(int userid, std::string msg)
+{
+    std::lock_guard<std::mutex> lck(_mtx);
+    auto it = _user_conn_map.find(userid);
+    if(it != _user_conn_map.end())
+    {
+        it->second->send(msg);
+        return;
+    }
+
+    _offlinemessagemodel.Insert(userid, msg);
 }

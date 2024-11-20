@@ -13,6 +13,7 @@
 #include "groupmodel.hpp"
 #include "offlinemessage.hpp"
 #include "usermodel.hpp"
+#include "redis.hpp"
 
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr& ,nlohmann::json& , muduo::Timestamp)>;
 class QChatService
@@ -66,6 +67,8 @@ public:
     // 重置所有用户状态
     void reset();
 
+    void handler_redis_subscribe_message(int userid, std::string msg);
+
 private:
     QChatService();
 
@@ -78,4 +81,5 @@ private:
     OfflineMessage _offlinemessagemodel;                                            // 离线消息表操作
     GroupModel _groupmodel;                                                         // 群组表操作
     FriendModel _friendmodel;                                                       // 好友表操作
+    Redis _redis;
 };

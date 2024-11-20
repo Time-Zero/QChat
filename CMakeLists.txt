@@ -11,6 +11,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/server)
 include_directories(${PROJECT_SOURCE_DIR}/include/db)
 include_directories(${PROJECT_SOURCE_DIR}/include/model)
+include_directories(${PROJECT_SOURCE_DIR}/include/redis)
+
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
